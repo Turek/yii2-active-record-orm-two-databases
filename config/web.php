@@ -1,7 +1,8 @@
 <?php
 
 $params = require __DIR__ . '/params.php';
-$db = require __DIR__ . '/db.php';
+$source_db = require __DIR__ . '/source-db.php';
+$destination_db = require __DIR__ . '/destination-db.php';
 
 $config = [
     'id' => 'basic',
@@ -42,7 +43,8 @@ $config = [
                 ],
             ],
         ],
-        'db' => $db,
+        'source_db' => $source_db,
+        'destination_db' => $destination_db,
         /*
         'urlManager' => [
             'enablePrettyUrl' => true,
