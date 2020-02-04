@@ -5,19 +5,20 @@ namespace app\commands;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use app\models\Source;
+use app\models\Destination;
 
 /**
- * This command echoes the first argument that you have entered.
+ * This class contains two CLI commands needed for this project.
  */
 class AppController extends Controller
 {
     /**
-     * This command echoes what you have entered as the message.
+     * Generates specified number of random rows to Source database.
      * 
      * @param int $count How many rows to create.
      * @return int Exit code.
      */
-    public function actionGenerate($count = 10)
+    public function actionGenerateRows($count = 10)
     {
         // Get count argument.
         $count = (int) $count;
@@ -26,6 +27,7 @@ class AppController extends Controller
         echo "There are " . $dbCount . " entries in the database.\n";
         echo "Generating " . $count . " random entries to Source database... ";
 
+        // Use transactions for more performance when saving multiple rows.
         $transaction = Source::getDb()->beginTransaction();
         try
         {
@@ -38,7 +40,7 @@ class AppController extends Controller
                     $source->name = $row['name'];
                     $source->surname = $row['surname'];
                     $source->email = $row['email'];
-                    $source->data = $row['data'];
+                    $source->data = floatval($row['data']);
                     $source->data2 = $row['data2'];
                     $source->save();
                 }
@@ -62,7 +64,7 @@ class AppController extends Controller
     }
 
     /**
-     * This command generates random row using Faker.
+     * Generates a random row using Faker.
      *
      * @return array Row of data.
      */
@@ -73,8 +75,67 @@ class AppController extends Controller
             'name' => $faker->firstName(),
             'surname' => $faker->lastName,
             'email' => $faker->email,
-            'data' => $faker->randomFloat(NULL,200,99999999),
+            'data' => $faker->randomFloat(2,200,99999999),
             'data2' => $faker->randomFloat(2,200,99999999),
         ];
     }
+
+    /**
+     * Moves data from Source database table to Destination database.
+     * 
+     * @return int Exit code.
+     */
+    public function actionMoveData()
+    {
+        $records = Source::find()->all();
+        $recordsCount = count($records);
+        $recordsSaved = 0;
+        $formatter = \Yii::$app->formatter;
+
+        // Loop through all records.
+        if ($recordsCount)
+        {
+            // Use transactions for more performance when saving multiple rows.
+            $transaction = Source::getDb()->beginTransaction();
+            try
+            {
+                foreach ($records as $i => $row)
+                {
+                    $fullname = $row->name . ' ' . $row->surname;
+                    // Basic check if entity already exists.
+                    $product = Destination::find()->where([
+                        'fullname' => $fullname,
+                        'e_mail' => $row->email,
+                    ])->all();
+                    // Create record if none was found.
+                    if (empty($product)) 
+                    {
+                        $destination = new Destination();
+                        $destination->fullname = $fullname;
+                        $destination->e_mail = $row->email;
+                        $destination->balance = $row->data;
+                        $destination->totalpurchase = $row->data2;
+                        $destination->save();
+                        $recordsSaved++;
+                    }
+                }
+                unset($destination);
+            }
+            catch(\Exception $e)
+            {
+                $transaction->rollBack();
+                throw $e;
+            }
+            catch(\Throwable $e)
+            {
+                $transaction->rollBack();
+                throw $e;
+            }
+        }
+
+        echo $recordsSaved . "/" . $recordsCount . " records moved to Destination database.\n";
+
+        return ExitCode::OK;
+    }
+
 }
