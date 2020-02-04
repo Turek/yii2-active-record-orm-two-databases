@@ -18,7 +18,8 @@
         "yiisoft/yii2": "~2.0.14",
         "yiisoft/yii2-bootstrap": "~2.0.0",
         "yiisoft/yii2-swiftmailer": "~2.0.0 || ~2.1.0",
-        "vlucas/phpdotenv": "^4.1"
+        "vlucas/phpdotenv": "^4.1",
+        "fzaninotto/faker": "^1.9"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.1.0",
@@ -45,6 +46,20 @@
         "post-create-project-cmd": [
             "yii\\composer\\Installer::postCreateProject",
             "yii\\composer\\Installer::postInstall"
+        ],
+        "run-migrations": [
+            "php yii migrate --migrationPath=@app/migrations/source --db=source_db",
+            "php yii migrate --migrationPath=@app/migrations/destination --db=destination_db"
+        ],
+        "generate-random-rows": [
+            "php yii app/generate 55"
+        ],
+        "move-data": [
+            "php bin/console app:move-data"
+        ],
+        "clean-databases": [
+            "php bin/console doctrine:schema:drop --em=source --full-database --force",
+            "php bin/console doctrine:schema:drop --em=destination --full-database --force"
         ]
     },
     "extra": {
