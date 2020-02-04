@@ -1,10 +1,10 @@
 <?php
 
-$env_dir = '..' . DIRECTORY_SEPARATOR;
+$env_dir = '.' . DIRECTORY_SEPARATOR;
 
 if (class_exists('\Dotenv\Dotenv') && file_exists($env_dir . '.env'))
 {
-    $dotenv = new \Dotenv\Dotenv($env_dir);
+    $dotenv = \Dotenv\Dotenv::createImmutable($env_dir);
     $dotenv->load();
 }
 else

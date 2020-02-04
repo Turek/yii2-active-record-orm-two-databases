@@ -19,7 +19,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${SOURCE_DB_PASSWORD}
       MYSQL_DATABASE: ${SOURCE_DB_DATABASE}
       MYSQL_USER: ${SOURCE_DB_USERNAME}
-      MYSQL_ROOT_HOST: 172.22.0.1
+      MYSQL_ROOT_HOST: "%"
     restart: always
     networks:
         - yii2
@@ -38,7 +38,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DESTINATION_DB_PASSWORD}
       MYSQL_DATABASE: ${DESTINATION_DB_DATABASE}
       MYSQL_USER: ${DESTINATION_DB_USERNAME}
-      MYSQL_ROOT_HOST: 172.22.0.1
+      MYSQL_ROOT_HOST: "%"
     restart: always
     networks:
         - yii2
